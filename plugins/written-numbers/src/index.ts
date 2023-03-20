@@ -8,6 +8,8 @@ function getArg(args: any[], name: string, defaultValue: any) {
 
 const registeredCommands = [];
 
+const numberRegex = /^-?(?:\d+\.?|\.\d+|\d+\.\d+)$/;
+
 export default {
 	onLoad: () => {
 		registeredCommands.push(
@@ -46,9 +48,13 @@ export default {
 					},
 				],
 				async execute(args, ctx) {
-					const number = getArg(args, "number", "");
+					let number = getArg(args, "number", "");
 					const commas = getArg(args, "commas", false);
 					const hundredAnd = getArg(args, "hundred_and", false);
+
+					if (!numberRegex.test(number)) {
+						number = new Function(`return ${number}`)();
+					}
 
 					const result = await fetch("https://numbers.kyza.net/api", {
 						method: "POST",
