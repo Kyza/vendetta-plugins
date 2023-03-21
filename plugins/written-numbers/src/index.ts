@@ -1,4 +1,5 @@
 import { commands, logger } from "@vendetta";
+import { clipboard } from "@vendetta/metro/common";
 import { getAssetIDByName } from "@vendetta/ui/assets";
 import { showToast } from "@vendetta/ui/toasts";
 
@@ -72,7 +73,6 @@ export default {
 
 					logger.log(result, args);
 
-					// @ts-ignore
 					clipboard.setString(result);
 					showToast("Copied number to clipboard.", getAssetIDByName("toast_copy_link"));
 
