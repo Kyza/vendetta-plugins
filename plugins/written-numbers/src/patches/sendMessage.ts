@@ -145,6 +145,7 @@ export async function replaceIgnoreCodeblocks(
 		log("The transformed message is too long.");
 		return originalContent;
 	}
+	return content;
 }
 
 export function patch() {
