@@ -132,7 +132,6 @@ async function replaceIgnoreCodeblocks(content: string): Promise<string> {
 		);
 	}
 
-	// TODO: Test if the user has nitro.
 	if (
 		(getCurrentUser().premiumType === 0 && content.length > 2000) ||
 		content.length > 4000
