@@ -4,6 +4,7 @@ import { storage } from "@vendetta/plugin";
 import log from "../../log";
 import toWords from "../toWords";
 
+const { getCurrentUser } = findByProps("getCurrentUser");
 const Messages = findByProps("sendMessage", "receiveMessage");
 
 let savedPatch: () => void;
@@ -132,7 +133,14 @@ async function replaceIgnoreCodeblocks(content: string): Promise<string> {
 	}
 
 	// TODO: Test if the user has nitro.
-	return content.length > 4000 ? originalContent : content;
+	if (
+		(getCurrentUser().premiumType === 0 && content.length > 2000) ||
+		content.length > 4000
+	) {
+		log("The transformed message is too long.");
+		return originalContent;
+	}
+	return content;
 }
 
 export function patch() {
