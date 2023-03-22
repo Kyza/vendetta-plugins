@@ -94,8 +94,8 @@ export async function replaceIgnoreCodeblocks(
 		}
 	}
 
-	// Find basic numbers.
-	if (storage.replace.basic) {
+	// Find all numbers.
+	if (storage.replace.all) {
 		match = null;
 		while ((match = globalNumberRegex.exec(content)) !== null) {
 			// This is necessary to avoid infinite loops with zero-width matches
