@@ -36,8 +36,10 @@ type Match = {
 	words: Promise<string> | string;
 };
 
-const inlineCodeblockRegex =
+const codeblockRegex =
 	/(?:(?:(?<!\\)```(?:.|\n)+?(?<!\\)```)|(?:(?<!\\)`[^`]+?`))/g;
+const linkRegex =
+	/(([-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))|(?:(?<!\\)<.+?>))/gi;
 const globalNumberRegex = /\b(?<!n)-?(?:\d+\.|\d+|\.\d+|\d+\.\d+)(?!;;)\b/gi;
 const globalSyntaxRegex = /\b(n)(.+?);;/gi;
 async function replaceIgnoreCodeblocks(content: string): Promise<string> {
@@ -49,11 +51,20 @@ async function replaceIgnoreCodeblocks(content: string): Promise<string> {
 
 	// Find ranges where numbers should not be replaced.
 	let match;
-	while ((match = inlineCodeblockRegex.exec(content)) !== null) {
+	while ((match = codeblockRegex.exec(content)) !== null) {
 		// This is necessary to avoid infinite loops with zero-width matches
-		if (match.index === inlineCodeblockRegex.lastIndex) {
-			inlineCodeblockRegex.lastIndex++;
+		if (match.index === codeblockRegex.lastIndex) {
+			codeblockRegex.lastIndex++;
 		}
+		ranges.push([match.index, match.index + match[0].length - 1]);
+	}
+	match = null;
+	while ((match = linkRegex.exec(content)) !== null) {
+		// This is necessary to avoid infinite loops with zero-width matches
+		if (match.index === linkRegex.lastIndex) {
+			linkRegex.lastIndex++;
+		}
+		log(match[0]);
 		ranges.push([match.index, match.index + match[0].length - 1]);
 	}
 
