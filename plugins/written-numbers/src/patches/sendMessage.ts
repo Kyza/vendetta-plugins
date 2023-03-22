@@ -41,9 +41,12 @@ const codeblockRegex =
 	/(?:(?:(?<!\\)```(?:.|\n)+?(?<!\\)```)|(?:(?<!\\)`[^`]+?`))/g;
 const linkRegex =
 	/(([-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*))|(?:(?<!\\)<.+?>))/gi;
-const globalNumberRegex = /\b(?<!n)-?(?:\d+\.|\d+|\.\d+|\d+\.\d+)(?!;;)\b/gi;
-const globalSyntaxRegex = /\b(n)(.+?);;/gi;
-async function replaceIgnoreCodeblocks(content: string): Promise<string> {
+const globalNumberRegex =
+	/(\\)?\b(?<!n)-?(\d+\.|\d+|\.\d+|\d+\.\d+)(?!;;)\b/gi;
+const globalSyntaxRegex = /(\\)?\b((n)(.+?);;)/gi;
+export async function replaceIgnoreCodeblocks(
+	content: string
+): Promise<string> {
 	const originalContent = content;
 
 	// First match codeblocks, then save the ranges where they exist.
@@ -82,8 +85,8 @@ async function replaceIgnoreCodeblocks(content: string): Promise<string> {
 				matches.push({
 					type: MatchType.SYNTAX,
 					match,
-					capitalize: match[1] === "N",
-					words: toWords({ number: match[2] }),
+					capitalize: match[3] === "N",
+					words: match[1] === "\\" ? match[2] : toWords({ number: match[4] }),
 				});
 				// Ensure any numbers inside the syntax don't get matched later.
 				ranges.push([match.index, match.index + match[0].length - 1]);
@@ -104,7 +107,7 @@ async function replaceIgnoreCodeblocks(content: string): Promise<string> {
 					type: MatchType.PLAIN,
 					match,
 					capitalize: false,
-					words: toWords({ number: match[0] }),
+					words: match[1] === "\\" ? match[2] : toWords({ number: match[2] }),
 				});
 			}
 		}

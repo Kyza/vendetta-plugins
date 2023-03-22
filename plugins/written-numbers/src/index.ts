@@ -10,9 +10,13 @@ import {
 } from "./patches/sendMessage";
 
 storage.replace ??= {
-	basic: true,
+	all: true,
 	syntax: true,
 };
+
+// Migrate v1.
+storage.replace.all =
+	storage.replace.all != null ? storage.replace.all : storage.replace.basic;
 
 export default {
 	onLoad: () => {
