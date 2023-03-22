@@ -4,10 +4,14 @@ import { storage } from "@vendetta/plugin";
 import log from "../../log";
 import toWords from "../toWords";
 
-const { getCurrentUser } = findByProps("getCurrentUser");
+const { canUseIncreasedMessageLength } = findByProps(
+	"canUseIncreasedMessageLength"
+);
 const Messages = findByProps("sendMessage", "receiveMessage");
+const FileUploader = findByProps("uploadLocalFiles");
 
-let savedPatch: () => void;
+let sendMessagePatch: () => void;
+let uploadLocalFilesPatch: () => void;
 
 function isInRanges(ranges: [number, number][], location: number): boolean {
 	return ranges.some(([start, end]) => start <= location && location <= end);
@@ -135,30 +139,47 @@ export async function replaceIgnoreCodeblocks(
 	}
 
 	if (
-		(getCurrentUser().premiumType === 0 && content.length > 2000) ||
+		(content.length > 2000 && !canUseIncreasedMessageLength()) ||
 		content.length > 4000
 	) {
 		log("The transformed message is too long.");
 		return originalContent;
 	}
-	return content;
 }
 
 export function patch() {
 	unpatch();
-	savedPatch = instead("sendMessage", Messages, (args, original) => {
-		const clonedArgs = JSON.parse(JSON.stringify(args));
-		(async () => {
+	sendMessagePatch = instead(
+		"sendMessage",
+		Messages,
+		async (args, original) => {
+			// Clone because the data gets destroyed.
+			const clonedArgs = JSON.parse(JSON.stringify(args));
 			try {
 				clonedArgs[1].content = await replaceIgnoreCodeblocks(clonedArgs[1].content);
 			} catch (e) {
 				log(e.stack);
 			}
 			original(...clonedArgs);
-		})();
-	});
+		}
+	);
+	uploadLocalFilesPatch = instead(
+		"uploadLocalFiles",
+		FileUploader,
+		async (args, original) => {
+			try {
+				args[0].parsedMessage.content = await replaceIgnoreCodeblocks(
+					args[0].parsedMessage.content
+				);
+			} catch (e) {
+				log(e.stack);
+			}
+			original(...args);
+		}
+	);
 }
 
 export function unpatch() {
-	savedPatch?.();
+	sendMessagePatch?.();
+	uploadLocalFilesPatch?.();
 }
