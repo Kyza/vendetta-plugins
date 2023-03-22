@@ -65,7 +65,6 @@ async function replaceIgnoreCodeblocks(content: string): Promise<string> {
 		if (match.index === linkRegex.lastIndex) {
 			linkRegex.lastIndex++;
 		}
-		log(match[0]);
 		ranges.push([match.index, match.index + match[0].length - 1]);
 	}
 
