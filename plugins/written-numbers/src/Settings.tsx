@@ -9,7 +9,7 @@ import { useProxy } from "@vendetta/storage";
 import { semanticColors } from "@vendetta/ui";
 import { getAssetIDByName } from "@vendetta/ui/assets";
 import { Forms } from "@vendetta/ui/components";
-import { replaceIgnoreCodeblocks } from "./patches/sendMessage";
+import { parse } from "./patches/sendMessage";
 
 const { FormSection, FormDivider, FormRow, FormSwitchRow, FormText } = Forms;
 
@@ -41,7 +41,7 @@ export default function Settings() {
 		// @ts-ignore
 		async () => {
 			setUsage(
-				await replaceIgnoreCodeblocks(`\\3001 -> 3001
+				await parse(`\\3001 -> 3001
 
 \\n3001;; -> n3001;;
 \\N3001;; -> N3001;;
